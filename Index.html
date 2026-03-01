@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Men Outfit Selector</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {font-family: Arial; text-align:center; background:#f2f2f2;}
+.section {display:none;}
+.section.active {display:block;}
+.options img {
+  width:100px; margin:10px; cursor:pointer;
+  border:2px solid transparent; border-radius:8px;
+}
+.options img.selected {border:2px solid black; transform:scale(1.1);}
+#outfits img {width:120px; margin:5px;}
+</style>
+</head>
+
+<body>
+
+<h1>Men Outfit Selector</h1>
+
+<div id="climate-section" class="section active">
+  <h2>Select Climate</h2>
+  <div class="options" id="climate-options"></div>
+</div>
+
+<div id="occasion-section" class="section">
+  <h2>Select Occasion</h2>
+  <div class="options" id="occasion-options"></div>
+</div>
+
+<div id="place-section" class="section">
+  <h2>Select Place</h2>
+  <div class="options" id="place-options"></div>
+  <br>
+  <button onclick="findOutfit()">Find Outfit</button>
+</div>
+
+<div id="outfits" class="section"></div>
+
+<script>
+const climates = ["summer","winter","rainy"];
+const occasions = ["casual","formal","semi-formal","business","travel","party","wedding","sports","outdoor","daily","datenight","festival"];
+const places = ["office","coffee","restaurant","mall","library","friend","park","beach","gym","weddinghall","airport","college"];
+
+let selectedClimate="", selectedOccasion="", selectedPlace="";
+
+// Generate combinations
+const combinations=[];
+let idCounter=1;
+for(let c of climates){
+  for(let o of occasions){
+    for(let p of places){
+      const id=String(idCounter).padStart(3,"0");
+      const code=c[0]+o[0]+p[0];
+      combinations.push({id, climate:c, occasion:o, place:p, code});
+      idCounter++;
+    }
+  }
+}
+
+// Create image buttons
+function createOptions(containerId, list, callback){
+  const box=document.getElementById(containerId);
+  box.innerHTML="";
+  list.forEach(item=>{
+    const img=document.createElement("img");
+    img.src=item+".jpg";   // images must exist
+    img.onclick=()=>callback(img,item);
+    box.appendChild(img);
+  });
+}
+
+createOptions("climate-options", climates, (img,val)=>{
+  selectOnly("climate-options",img);
+  selectedClimate=val;
+  show("occasion-section");
+});
+
+createOptions("occasion-options", occasions, (img,val)=>{
+  selectOnly("occasion-options",img);
+  selectedOccasion=val;
+  show("place-section");
+});
+
+createOptions("place-options", places, (img,val)=>{
+  selectOnly("place-options",img);
+  selectedPlace=val;
+});
+
+function selectOnly(containerId,img){
+  document.querySelectorAll("#"+containerId+" img").forEach(i=>i.classList.remove("selected"));
+  img.classList.add("selected");
+}
+
+function show(id){
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+function findOutfit(){
+  const match = combinations.find(c=>
+    c.climate===selectedClimate &&
+    c.occasion===selectedOccasion &&
+    c.place===selectedPlace
+  );
+
+  if(!match){ alert("No match found"); return; }
+
+  const outfits=document.getElementById("outfits");
+  outfits.innerHTML="<h2>Your Outfits</h2>";
+  show("outfits");
+
+  for(let i=1;i<=10;i++){
+    const num=String(i).padStart(2,"0");
+    const img=document.createElement("img");
+    img.src = match.id+match.code+num+".jpg";
+    outfits.appendChild(img);
+  }
+}
+</script>
+
+</body>
+</html>
